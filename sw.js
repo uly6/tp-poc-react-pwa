@@ -78,7 +78,7 @@ if (workbox) {
   },
   {
     "url": "index.html",
-    "revision": "caf57eb5ebfb4bfbaee0d61562e0a0c0"
+    "revision": "fbffb1280b6ffc5955964d169a3bc17b"
   },
   {
     "url": "mstile-150x150.png",
@@ -89,16 +89,16 @@ if (workbox) {
     "revision": "eac203985bdb019f84605aac04abb861"
   },
   {
-    "url": "static/js/2.a441141e.chunk.js",
-    "revision": "3b9633d419ca07803a0a9f4df0580ee4"
+    "url": "static/js/2.93183817.chunk.js",
+    "revision": "9c68355e31ce0c90872af250805e52ce"
   },
   {
-    "url": "static/js/2.a441141e.chunk.js.LICENSE.txt",
+    "url": "static/js/2.93183817.chunk.js.LICENSE.txt",
     "revision": "0749163b59fbee32225059cb60c18af6"
   },
   {
-    "url": "static/js/main.e55a2bdd.chunk.js",
-    "revision": "b22234a48dbb83f3b080c6845719b908"
+    "url": "static/js/main.926a1922.chunk.js",
+    "revision": "7cba7427b09859424f47cdc3f5cdf3b2"
   },
   {
     "url": "static/js/runtime-main.efee8712.js",
