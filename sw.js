@@ -58,7 +58,7 @@ if (workbox) {
   },
   {
     "url": "index.html",
-    "revision": "a7b10c6370cc11b95c93dab8d07cba95"
+    "revision": "b7406ea48669fe5429348192ff84de61"
   },
   {
     "url": "static/css/main.5ecd60fb.chunk.css",
@@ -73,12 +73,12 @@ if (workbox) {
     "revision": "0749163b59fbee32225059cb60c18af6"
   },
   {
-    "url": "static/js/main.22d06e25.chunk.js",
-    "revision": "077c26c5a45997264f8d90f3d37eb82d"
+    "url": "static/js/main.e55a2bdd.chunk.js",
+    "revision": "b22234a48dbb83f3b080c6845719b908"
   },
   {
-    "url": "static/js/runtime-main.c69d12cd.js",
-    "revision": "e7fc08724208e47e9871ad2dd2a8d551"
+    "url": "static/js/runtime-main.efee8712.js",
+    "revision": "e1adc2e7ba7e8f5762570dcd347ef39b"
   }
 ]);
 
