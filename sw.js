@@ -29,6 +29,38 @@ if (workbox) {
     "revision": "9f4a0e904b4f7b3e94392a98057b5e49"
   },
   {
+    "url": "apple-touch-icon-128x128.png",
+    "revision": "9a44bc47067b95b642305598551fb87e"
+  },
+  {
+    "url": "apple-touch-icon-144x144.png",
+    "revision": "4ee2c5a64a4ab4a4edcfa6d3fd2f258f"
+  },
+  {
+    "url": "apple-touch-icon-152x152.png",
+    "revision": "3055062c7792b9e17a185bb3866d0cb8"
+  },
+  {
+    "url": "apple-touch-icon-192x192.png",
+    "revision": "2e551402654d5cb449eadf6e37135197"
+  },
+  {
+    "url": "apple-touch-icon-384x384.png",
+    "revision": "2e551402654d5cb449eadf6e37135197"
+  },
+  {
+    "url": "apple-touch-icon-512x512.png",
+    "revision": "2e551402654d5cb449eadf6e37135197"
+  },
+  {
+    "url": "apple-touch-icon-72x72.png",
+    "revision": "a8302b0a004a04ccd0878701612f0f11"
+  },
+  {
+    "url": "apple-touch-icon-96x96.png",
+    "revision": "b55e2c90ce6a3e8bd890ec5028433686"
+  },
+  {
     "url": "apple-touch-icon.png",
     "revision": "ff8436dd7b6f77466d01ea5e9ab3fb39"
   },
@@ -46,7 +78,7 @@ if (workbox) {
   },
   {
     "url": "index.html",
-    "revision": "d7a7136eed68c55369c20a021ed89bc3"
+    "revision": "9ac2c8b94e58346ac45da9f0d00a1683"
   },
   {
     "url": "mstile-150x150.png",
