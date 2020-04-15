@@ -58,23 +58,23 @@ if (workbox) {
   },
   {
     "url": "index.html",
-    "revision": "e08ce07d17c69e31fa74fc4757daaab5"
+    "revision": "748904699957f0944c14f2efb933585f"
   },
   {
     "url": "static/css/main.5ecd60fb.chunk.css",
     "revision": "eac203985bdb019f84605aac04abb861"
   },
   {
-    "url": "static/js/2.709bc133.chunk.js",
-    "revision": "ff425414c16acdacdc60df1c87d5fe04"
+    "url": "static/js/2.a441141e.chunk.js",
+    "revision": "3b9633d419ca07803a0a9f4df0580ee4"
   },
   {
-    "url": "static/js/2.709bc133.chunk.js.LICENSE.txt",
+    "url": "static/js/2.a441141e.chunk.js.LICENSE.txt",
     "revision": "0749163b59fbee32225059cb60c18af6"
   },
   {
-    "url": "static/js/main.28e0fd4d.chunk.js",
-    "revision": "666e9fee32928ba3827342327a6b4390"
+    "url": "static/js/main.8f91ea96.chunk.js",
+    "revision": "a75e7e54ceee5240b1021441aa376289"
   },
   {
     "url": "static/js/runtime-main.efee8712.js",
