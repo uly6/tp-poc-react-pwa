@@ -117,7 +117,6 @@ export default function OrderDetail() {
               <input
                 type="file"
                 accept="image/*"
-                capture
                 id="icon-button-file"
                 className={classes.inputFile}
                 onChange={onChangeImageUpload}
