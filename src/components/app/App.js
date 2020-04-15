@@ -4,7 +4,7 @@ import Container from '@material-ui/core/Container';
 import { makeStyles } from '@material-ui/core/styles';
 import Header from './Header';
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Route,
   Switch,
 } from 'react-router-dom';
@@ -24,7 +24,7 @@ export default function App() {
   const classes = useStyles();
 
   return (
-    <Router>
+    <Router basename="/">
       <CssBaseline />
       <Header />
       <Container maxWidth="md">

@@ -2,7 +2,7 @@
   "name": "test-01",
   "version": "0.1.0",
   "private": true,
-  "homepage": "/",
+  "homepage": "/tp-poc-react-pwa",
   "dependencies": {
     "@material-ui/core": "^4.9.9",
     "@material-ui/icons": "^4.9.1",
