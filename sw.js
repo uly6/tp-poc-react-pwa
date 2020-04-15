@@ -21,44 +21,36 @@ if (workbox) {
   // injection point for manifest
   workbox.precaching.precacheAndRoute([
   {
+    "url": "android-chrome-192x192.png",
+    "revision": "456c583e00202be94a16d088e92ac704"
+  },
+  {
+    "url": "android-chrome-512x512.png",
+    "revision": "9f4a0e904b4f7b3e94392a98057b5e49"
+  },
+  {
+    "url": "apple-touch-icon.png",
+    "revision": "ff8436dd7b6f77466d01ea5e9ab3fb39"
+  },
+  {
+    "url": "favicon-16x16.png",
+    "revision": "a9e720c1b40d9f5ddd4ad0186faf0bf5"
+  },
+  {
+    "url": "favicon-32x32.png",
+    "revision": "40219b86db232434de5295d6f53a2ede"
+  },
+  {
     "url": "favicon.ico",
-    "revision": "631e844dab1488d0a81270eefb6ed9d8"
-  },
-  {
-    "url": "images/icons/icon-128x128.png",
-    "revision": "5d2404de38b82331b8726d9af53fd238"
-  },
-  {
-    "url": "images/icons/icon-144x144.png",
-    "revision": "751dd18f09191f43c8afd41fdf4daa4f"
-  },
-  {
-    "url": "images/icons/icon-152x152.png",
-    "revision": "4b5cb4f1f5d59e917471a2470f51cb41"
-  },
-  {
-    "url": "images/icons/icon-192x192.png",
-    "revision": "57ca57ab099569f207befb1cba4fc026"
-  },
-  {
-    "url": "images/icons/icon-384x384.png",
-    "revision": "ee1374eab82a4589a1a3e3a8fc737c36"
-  },
-  {
-    "url": "images/icons/icon-512x512.png",
-    "revision": "e4d2f10c87dabc916bd67d9f10959746"
-  },
-  {
-    "url": "images/icons/icon-72x72.png",
-    "revision": "7c5d72e5eb8ceae6202cf286bcb24926"
-  },
-  {
-    "url": "images/icons/icon-96x96.png",
-    "revision": "d757b3703f0171977ef1e9a072c74206"
+    "revision": "41443886027e8756a004371a727d2771"
   },
   {
     "url": "index.html",
-    "revision": "b7406ea48669fe5429348192ff84de61"
+    "revision": "d7a7136eed68c55369c20a021ed89bc3"
+  },
+  {
+    "url": "mstile-150x150.png",
+    "revision": "e3fda3356983c9ea222f7b44d681f8c8"
   },
   {
     "url": "static/css/main.5ecd60fb.chunk.css",
