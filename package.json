@@ -2,6 +2,7 @@
   "name": "test-01",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/",
   "dependencies": {
     "@material-ui/core": "^4.9.9",
     "@material-ui/icons": "^4.9.1",
@@ -17,7 +18,9 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start-sw": "http-server -c-1 build",
+    "build": "react-scripts build && yarn run build-sw",
+    "build-sw": "node ./src/sw-build.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "yarn run build",
@@ -39,6 +42,8 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^2.2.0"
+    "gh-pages": "^2.2.0",
+    "workbox-build": "4.3.1",
+    "http-server": "^0.10.0"
   }
 }
