@@ -13,9 +13,11 @@ import {
   makeStyles,
   GridList,
   GridListTile,
+  GridListTileBar,
 } from '@material-ui/core';
 import AddAPhotoIcon from '@material-ui/icons/AddAPhoto';
 import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
+import LocationOnIcon from '@material-ui/icons/LocationOn';
 import { useParams } from 'react-router-dom';
 import {
   addImage,
@@ -27,6 +29,9 @@ const useStyles = makeStyles((theme) => ({
   root: {},
   inputFile: {
     display: 'none',
+  },
+  icon: {
+    color: 'rgba(255, 255, 255, 0.54)',
   },
 }));
 
@@ -60,6 +65,7 @@ export default function OrderDetail() {
     setIsError(false);
     try {
       const response = await getImagesByOrderId(orderId);
+      console.log(response);
       setImages(response);
     } catch (err) {
       console.error(err);
@@ -95,6 +101,30 @@ export default function OrderDetail() {
       const result = await addImage(order._id, element.files[0]);
       setImages([...images, result]);
     }
+  };
+
+  const onClickMap = (data) => (event) => {
+    console.log('==>> onClickMap', data);
+
+    if (!data) {
+      return;
+    }
+
+    const { lat, lng } = data;
+
+    if (['iPhone', 'iPad', 'iPod'].includes(navigator.platform)) {
+      const win = window.open(
+        `maps://maps.google.com/maps?daddr=${lat},${lng}&amp;ll=`,
+        '_top',
+      );
+      return win.focus();
+    }
+    /* default to Google */
+    const win = window.open(
+      `https://maps.google.com/maps?q=${lat},${lng}`,
+      '_blank',
+    );
+    return win.focus();
   };
 
   return (
@@ -144,6 +174,9 @@ export default function OrderDetail() {
               </List>
             </Paper>
           </Grid>
+
+          {/* IMAGES AND VIDEOS */}
+
           <Grid
             item
             container
@@ -154,7 +187,7 @@ export default function OrderDetail() {
             <Grid item>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/*,video/*"
                 id="icon-button-file"
                 className={classes.inputFile}
                 onChange={onChangeImageUpload}
@@ -166,6 +199,7 @@ export default function OrderDetail() {
               </label>
             </Grid>
           </Grid>
+
           <Grid item xs={12}>
             <Paper elevation={1}>
               <GridList cellHeight={180} cols={3}>
@@ -175,20 +209,72 @@ export default function OrderDetail() {
                   style={{ height: 'auto' }}
                 >
                   <ListSubheader component="div" color="primary">
-                    Pictures
+                    Images
+                  </ListSubheader>
+                </GridListTile>
+
+                {images &&
+                  images
+                    .filter((image) =>
+                      image._attachments.file.content_type.includes(
+                        'image/',
+                      ),
+                    )
+                    .map((image) => (
+                      <GridListTile key={image._id} cols={1}>
+                        <img
+                          src={URL.createObjectURL(
+                            image._attachments.file.data,
+                          )}
+                          alt={image.name}
+                        />
+                        <GridListTileBar
+                          title={image.name}
+                          subtitle={
+                            image.location
+                              ? `${image.location.lat}, ${image.location.lng}`
+                              : 'No location'
+                          }
+                          actionIcon={
+                            image.location ? (
+                              <IconButton
+                                className={classes.icon}
+                                onClick={onClickMap(image.location)}
+                              >
+                                <LocationOnIcon />
+                              </IconButton>
+                            ) : null
+                          }
+                        />
+                      </GridListTile>
+                    ))}
+                <GridListTile
+                  key="Subheader"
+                  cols={3}
+                  style={{ height: 'auto' }}
+                >
+                  <ListSubheader component="div" color="primary">
+                    Videos
                   </ListSubheader>
                 </GridListTile>
                 {images &&
-                  images.map((image) => (
-                    <GridListTile key={image._id} cols={1}>
-                      <img
-                        src={URL.createObjectURL(
-                          image._attachments.file.data,
-                        )}
-                        alt={image.name}
-                      />
-                    </GridListTile>
-                  ))}
+                  images
+                    .filter((image) =>
+                      image._attachments.file.content_type.includes(
+                        'video/',
+                      ),
+                    )
+                    .map((image) => (
+                      <GridListTile key={image._id} cols={1}>
+                        <video
+                          height={180}
+                          controls
+                          src={URL.createObjectURL(
+                            image._attachments.file.data,
+                          )}
+                        />
+                      </GridListTile>
+                    ))}
               </GridList>
             </Paper>
           </Grid>

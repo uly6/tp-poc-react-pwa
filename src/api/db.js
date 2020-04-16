@@ -1,6 +1,11 @@
 import PouchDB from 'pouchdb';
 import PouchFindPlugin from 'pouchdb-find';
-import shortid from 'shortid';
+import * as shortid from 'shortid';
+import { getGeolocationFromImage } from '../utils/image';
+
+shortid.characters(
+  '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@',
+);
 
 // enable queries
 // https://pouchdb.com/guides/mango-queries.html
@@ -188,11 +193,16 @@ export async function addImage(orderId, imageFile) {
   const { name, type } = imageFile;
 
   try {
+    const location = type.includes('image')
+      ? await getGeolocationFromImage(imageFile)
+      : null;
+
     // inline attachment
     const doc = {
-      _id: shortid(),
+      _id: shortid.generate(),
       orderId,
       name,
+      location,
       _attachments: {
         file: {
           content_type: type,
