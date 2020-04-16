@@ -22,6 +22,9 @@ setCacheNameDetails({
   suffix: 'v1',
 });
 
+// injection point for generated precache
+precacheAndRoute(self.__WB_MANIFEST);
+
 // cache the Google Fonts stylesheets
 registerRoute(
   /^https:\/\/fonts\.googleapis\.com/,
@@ -62,6 +65,3 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
-
-// injection point for generated precache
-precacheAndRoute(self.__WB_MANIFEST);
