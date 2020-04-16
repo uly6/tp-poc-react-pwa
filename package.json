@@ -45,6 +45,6 @@
   "devDependencies": {
     "gh-pages": "^2.2.0",
     "http-server": "^0.10.0",
-    "workbox-build": "4.3.1"
+    "workbox-build": "^5.1.2"
   }
 }

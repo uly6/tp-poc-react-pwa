@@ -60,10 +60,33 @@ export function register(config) {
   }
 }
 
+// custom code
+const listenForWaitingServiceWorker = (registration, callback) => {
+  function awaitStateChange() {
+    registration.installing.addEventListener(
+      'statechange',
+      function () {
+        if (this.state === 'installed') callback(registration);
+      },
+    );
+  }
+  if (!registration) return;
+  if (registration.waiting) return callback(registration);
+  if (registration.installing) awaitStateChange();
+  registration.addEventListener('updatefound', awaitStateChange);
+};
+
 function registerValidSW(swUrl, config) {
   navigator.serviceWorker
     .register(swUrl)
     .then((registration) => {
+      // custom code
+      listenForWaitingServiceWorker(registration, (r) => {
+        window.update = () => {
+          r.waiting.postMessage({ type: 'SKIP_WAITING' });
+        };
+      });
+
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
         if (installingWorker == null) {
@@ -105,6 +128,14 @@ function registerValidSW(swUrl, config) {
         error,
       );
     });
+
+  // custom code
+  let refreshing;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload(true);
+  });
 }
 
 function checkValidServiceWorker(swUrl, config) {
