@@ -17,8 +17,11 @@ import {
 import AddAPhotoIcon from '@material-ui/icons/AddAPhoto';
 import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
 import { useParams } from 'react-router-dom';
-import { useGetOrderById } from '../../api/hooks';
-import { attachImageToOrder } from '../../api/db';
+import {
+  addImage,
+  getOrderById,
+  getImagesByOrderId,
+} from '../../api/db';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -30,22 +33,55 @@ const useStyles = makeStyles((theme) => ({
 export default function OrderDetail() {
   const classes = useStyles();
   let { id } = useParams();
-  const { data, isLoading, isError } = useGetOrderById(id);
-  const [state, setState] = useState(data);
+
+  // states
+  const [isError, setIsError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [order, setOrder] = useState();
+  const [images, setImages] = useState([]);
+
+  // order
+  async function fetchOrderById(id) {
+    setIsLoading(true);
+    setIsError(false);
+    try {
+      const response = await getOrderById(id);
+      setOrder(response);
+    } catch (err) {
+      console.error(err);
+      setIsError(true);
+    }
+    setIsLoading(false);
+  }
+
+  // images
+  async function fetchImagesByOrderId(orderId) {
+    setIsLoading(true);
+    setIsError(false);
+    try {
+      const response = await getImagesByOrderId(orderId);
+      setImages(response);
+    } catch (err) {
+      console.error(err);
+      setIsError(true);
+    }
+    setIsLoading(false);
+  }
 
   useEffect(() => {
-    if (data && data._attachments) {
-      console.log(Object.keys(data._attachments));
-    }
-    setState(data);
-  }, [data]);
+    fetchOrderById(id);
+  }, []);
+
+  useEffect(() => {
+    fetchImagesByOrderId(id);
+  }, []);
 
   const handleToggle = (task) => (event) => {
     console.log('Task: ', task.id, ', done: ', event.target.checked);
 
-    setState({
-      ...state,
-      tasks: state.tasks.map((item) =>
+    setOrder({
+      ...order,
+      tasks: order.tasks.map((item) =>
         task.id === item.id
           ? { ...item, done: event.target.checked }
           : item,
@@ -56,10 +92,8 @@ export default function OrderDetail() {
   const onChangeImageUpload = async (event) => {
     const element = document.getElementById('icon-button-file');
     if (element.files && element.files[0]) {
-      const file = element.files[0];
-      const result = await attachImageToOrder(state._id, file);
-      setState(result);
-      console.log(result);
+      const result = await addImage(order._id, element.files[0]);
+      setImages([...images, result]);
     }
   };
 
@@ -67,13 +101,13 @@ export default function OrderDetail() {
     <div>
       {isError && <div>Something went wrong ...</div>}
       {isLoading && <div>Loading...</div>}
-      {!isLoading && !data && (
+      {!isLoading && !order && (
         <Typography variant="subtitle1">Order not found</Typography>
       )}
-      {state && (
+      {order && (
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Typography variant="h5">{state.description}</Typography>
+            <Typography variant="h5">{order.description}</Typography>
           </Grid>
           <Grid
             item
@@ -90,8 +124,12 @@ export default function OrderDetail() {
           </Grid>
           <Grid item xs={12}>
             <Paper elevation={1}>
-              <List subheader={<ListSubheader>Tasks</ListSubheader>}>
-                {state.tasks.map((task) => (
+              <List
+                subheader={
+                  <ListSubheader color="primary">Tasks</ListSubheader>
+                }
+              >
+                {order.tasks.map((task) => (
                   <ListItem key={task.id}>
                     <ListItemText primary={task.description} />
                     <ListItemSecondaryAction>
@@ -136,18 +174,18 @@ export default function OrderDetail() {
                   cols={3}
                   style={{ height: 'auto' }}
                 >
-                  <ListSubheader component="div">
+                  <ListSubheader component="div" color="primary">
                     Pictures
                   </ListSubheader>
                 </GridListTile>
-                {state._attachments &&
-                  Object.keys(state._attachments).map((fileName) => (
-                    <GridListTile key={fileName} cols={1}>
+                {images &&
+                  images.map((image) => (
+                    <GridListTile key={image._id} cols={1}>
                       <img
                         src={URL.createObjectURL(
-                          state._attachments[fileName].data,
+                          image._attachments.file.data,
                         )}
-                        alt={fileName}
+                        alt={image.name}
                       />
                     </GridListTile>
                   ))}

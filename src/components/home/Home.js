@@ -44,7 +44,7 @@ export default function Home() {
         const response = await getSyncMetadata();
         setSyncMetadata(response);
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     }
     fetchSyncMetadata();
@@ -81,8 +81,6 @@ export default function Home() {
         const savedToDb = await Promise.all(
           ordersWithTasks.map((order) => addOrder(order)),
         );
-
-        console.log(savedToDb);
 
         setInProgress({
           message: 'Finishing to save to local database',

@@ -1,9 +1,14 @@
 import PouchDB from 'pouchdb';
+import PouchFindPlugin from 'pouchdb-find';
+import shortid from 'shortid';
 
-const dbs = {};
+// enable queries
+// https://pouchdb.com/guides/mango-queries.html
+PouchDB.plugin(PouchFindPlugin);
 
 const SYNC_METADATA = 'sync-metadata';
 const ORDERS = 'orders';
+const IMAGES = 'images';
 
 export const DEFAULT_SYNC_METADATA = {
   _id: 'default',
@@ -15,20 +20,42 @@ export const DEFAULT_SYNC_METADATA = {
   deletedAt: '',
 };
 
-function getDB(dbname = ORDERS) {
-  if (!dbs[dbname]) {
-    dbs[dbname] = new PouchDB(dbname);
+let syncMetadataStore;
+let ordersStore;
+let imagesStore;
+
+function getSyncMetadataStore() {
+  if (!syncMetadataStore) {
+    syncMetadataStore = new PouchDB(SYNC_METADATA);
   }
-  return dbs[dbname];
+  return syncMetadataStore;
+}
+
+function getOrdersStore() {
+  if (!ordersStore) {
+    ordersStore = new PouchDB(ORDERS);
+  }
+  return ordersStore;
+}
+
+function getImagesStore() {
+  if (!imagesStore) {
+    imagesStore = new PouchDB(IMAGES);
+
+    imagesStore.createIndex({
+      index: { fields: ['orderId'] },
+    });
+  }
+  return imagesStore;
 }
 
 // ####################################
-// SYNC METADATA
+// SYNC METADATA STORE
 // ####################################
 
 export async function getSyncMetadata() {
   try {
-    return await getDB(SYNC_METADATA).get('default');
+    return await getSyncMetadataStore().get('default');
   } catch (err) {
     if (err && err.name === 'not_found') {
       return DEFAULT_SYNC_METADATA;
@@ -44,26 +71,25 @@ export async function updateSyncMetadata(data) {
       : data;
 
   // update
-  await getDB(SYNC_METADATA).put(doc);
+  await getSyncMetadataStore().put(doc);
 
   // return updated version
-  return await getDB(SYNC_METADATA).get('default');
+  return await getSyncMetadataStore().get('default');
 }
 
 // ####################################
-// ORDERS
+// ORDERS STORE
 // ####################################
 
 export async function getOrders() {
-  const result = await getDB(ORDERS).allDocs({ include_docs: true });
+  const result = await getOrdersStore().allDocs({
+    include_docs: true,
+  });
   return result.rows.map((row) => row.doc);
 }
 
 export async function getOrderById(id) {
-  return await getDB(ORDERS).get(id, {
-    attachments: true,
-    binary: true,
-  });
+  return await getOrdersStore().get(id);
 }
 
 export async function addOrder(order) {
@@ -73,46 +99,42 @@ export async function addOrder(order) {
     doc = { ...order, _id: order.id };
   }
   // save
-  const result = await getDB(ORDERS).put(doc);
+  const result = await getOrdersStore().put(doc);
   // return the most recebt version
   return getOrderById(result.id);
 }
 
 export async function updateOrder(order) {
   // load the latest rev
-  const { _rev } = await getDB(ORDERS).get(order._id);
+  const { _rev } = await getOrdersStore().get(order._id);
   // update
-  const result = await getDB(ORDERS).put({ ...order, _rev });
+  const result = await getOrdersStore().put({ ...order, _rev });
   // return the most recent version
   return getOrderById(result.id);
 }
 
 export async function deleteOrder(order) {
   // load latest rev
-  const doc = await getDB(ORDERS).get(order._id);
+  const doc = await getOrdersStore.get(order._id);
   // remove
-  return getDB(ORDERS).remove(doc);
+  return getOrdersStore().remove(doc);
 }
 
 export async function deleteAllOrders() {
   // delete the store
-  const result = await getDB(ORDERS).destroy();
+  const result = await getOrdersStore().destroy();
   if (result.ok) {
-    dbs[ORDERS] = null;
+    ordersStore = null;
   }
   return result;
 }
 
-// ####################################
-// PICTURES
-// ####################################
-
 export async function attachImageToOrder(id, file) {
   const { name, type } = file;
   // load the latest rev
-  const { _rev } = await getDB(ORDERS).get(id);
+  const { _rev } = await getOrdersStore().get(id);
   // attache the file
-  const result = await getDB(ORDERS).putAttachment(
+  const result = await getOrdersStore().putAttachment(
     id,
     name,
     _rev,
@@ -121,4 +143,69 @@ export async function attachImageToOrder(id, file) {
   );
   // return the most recent version
   return getOrderById(result.id);
+}
+
+// ####################################
+// IMAGES STORE
+// ####################################
+
+export async function getImages() {
+  const result = await getImagesStore().allDocs({
+    include_docs: true,
+  });
+  return result.rows.map((row) => row.doc);
+}
+
+export async function getImagesByOrderId(orderId) {
+  // find does not return the attachments
+  const response = await getImagesStore().find({
+    selector: {
+      orderId,
+    },
+  });
+
+  // collect all ids
+  const ids = response.docs.map((doc) => doc._id);
+
+  const result = await getImagesStore().allDocs({
+    keys: ids,
+    include_docs: true,
+    attachments: true,
+    binary: true,
+  });
+
+  return result.rows.map((row) => row.doc);
+}
+
+export async function getImageById(id) {
+  return await getImagesStore().get(id, {
+    attachments: true,
+    binary: true,
+  });
+}
+
+export async function addImage(orderId, imageFile) {
+  const { name, type } = imageFile;
+
+  try {
+    // inline attachment
+    const doc = {
+      _id: shortid(),
+      orderId,
+      name,
+      _attachments: {
+        file: {
+          content_type: type,
+          data: imageFile,
+        },
+      },
+    };
+    // save
+    const result = await getImagesStore().put(doc);
+
+    // return saved image
+    return getImageById(result.id);
+  } catch (err) {
+    console.error(err);
+  }
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   IconButton,
@@ -11,11 +11,31 @@ import {
 } from '@material-ui/core';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { Link, useRouteMatch } from 'react-router-dom';
-import { useGetOrders } from '../../api/hooks';
+import { getOrders } from '../../api/db';
 
 export default function OrderList() {
   const { url } = useRouteMatch();
-  const { data, isLoading, isError } = useGetOrders();
+  const [isError, setIsError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [orders, setOrders] = useState([]);
+
+  // orders
+  async function fetchOrders() {
+    setIsLoading(true);
+    setIsError(false);
+    try {
+      const response = await getOrders();
+      setOrders(response);
+    } catch (err) {
+      console.error(err);
+      setIsError(true);
+    }
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   return (
     <div>
@@ -26,15 +46,15 @@ export default function OrderList() {
         <Grid item xs={12}>
           {isError && <div>Something went wrong ...</div>}
           {isLoading && <div>Loading...</div>}
-          {!isLoading && data.length === 0 && (
+          {!isLoading && orders.length === 0 && (
             <Typography variant="subtitle1">
               No orders to display
             </Typography>
           )}
-          {data.length > 0 && (
+          {orders.length > 0 && (
             <Paper elevation={1}>
               <List>
-                {data.map((order) => (
+                {orders.map((order) => (
                   <ListItem
                     key={order.id}
                     button
