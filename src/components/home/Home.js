@@ -223,7 +223,7 @@ export default function Home() {
             onClick={onClickUpload}
             disabled={syncMetadata.uploadDisabled}
           >
-            Upload
+            Upload (Not Working)
           </Button>
         </Grid>
         <Grid item xs={12}>
