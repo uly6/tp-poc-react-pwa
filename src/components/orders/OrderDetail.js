@@ -175,7 +175,7 @@ export default function OrderDetail() {
             </Paper>
           </Grid>
 
-          {/* IMAGES AND VIDEOS */}
+          {/* IMAGES */}
 
           <Grid
             item
@@ -204,7 +204,7 @@ export default function OrderDetail() {
             <Paper elevation={1}>
               <GridList cellHeight={180} cols={3}>
                 <GridListTile
-                  key="Subheader"
+                  key="Subheader-image"
                   cols={3}
                   style={{ height: 'auto' }}
                 >
@@ -248,8 +248,11 @@ export default function OrderDetail() {
                         />
                       </GridListTile>
                     ))}
+
+                {/* VIDEOS */}
+
                 <GridListTile
-                  key="Subheader"
+                  key="Subheader-video"
                   cols={3}
                   style={{ height: 'auto' }}
                 >
