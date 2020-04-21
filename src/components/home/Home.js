@@ -9,13 +9,14 @@ import {
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { fetchOrders, fetchOrderById } from '../../api/web';
+import { fetchOrders, fetchTasksByOrderId } from '../../api/web';
 import {
   addOrder,
   getSyncMetadata,
   DEFAULT_SYNC_METADATA,
   updateSyncMetadata,
-  deleteAllOrders,
+  cleanDatabases,
+  addTask,
 } from '../../api/db';
 
 const useStyles = makeStyles((theme) => ({
@@ -70,17 +71,25 @@ export default function Home() {
           message: `Loading tasks for ${orders.length} work orders from server`,
         });
 
-        const ordersWithTasks = await Promise.all(
-          orders.map((order) => fetchOrderById(order.id)),
-        );
-
         setInProgress({
           message: 'Saving work orders to local database',
         });
 
-        const savedToDb = await Promise.all(
-          ordersWithTasks.map((order) => addOrder(order)),
+        const ordersSavedToDb = await Promise.all(
+          orders.map((order) => addOrder(order)),
         );
+
+        setInProgress({
+          message: "Saving work orders' tasks to local database",
+        });
+
+        const orderIds = ordersSavedToDb.map((order) => order.id);
+
+        const tasks = await Promise.all(
+          orderIds.map((orderId) => fetchTasksByOrderId(orderId)),
+        );
+
+        await Promise.all(tasks.flat().map((task) => addTask(task)));
 
         setInProgress({
           message: 'Finishing to save to local database',
@@ -99,7 +108,7 @@ export default function Home() {
 
         setInProgress({
           loading: false,
-          message: `Loaded ${ordersWithTasks.length} work orders and tasks successfuly`,
+          message: `Loaded ${ordersSavedToDb.length} work orders successfuly`,
         });
       } else {
         setInProgress({
@@ -162,8 +171,8 @@ export default function Home() {
         message: 'Cleaning local database',
       });
 
-      // delete database
-      await deleteAllOrders();
+      // delete databases
+      await cleanDatabases();
 
       setInProgress({
         message: 'Finishing the cleaning of the local database',

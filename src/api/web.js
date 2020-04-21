@@ -13,3 +13,10 @@ export async function fetchOrderById(id) {
   );
   return response.json();
 }
+
+export async function fetchTasksByOrderId(orderId) {
+  const response = await fetch(
+    `https://tp-poc-api.herokuapp.com/api/tasks/${orderId}`,
+  );
+  return response.json();
+}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Typography,
   IconButton,
@@ -11,31 +11,11 @@ import {
 } from '@material-ui/core';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { Link, useRouteMatch } from 'react-router-dom';
-import { getOrders } from '../../api/db';
+import { useGetOrders } from './hooks';
 
 export default function OrderList() {
   const { url } = useRouteMatch();
-  const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [orders, setOrders] = useState([]);
-
-  // orders
-  async function fetchOrders() {
-    setIsLoading(true);
-    setIsError(false);
-    try {
-      const response = await getOrders();
-      setOrders(response);
-    } catch (err) {
-      console.error(err);
-      setIsError(true);
-    }
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  const [orders, isLoading, isError] = useGetOrders([]);
 
   return (
     <div>
@@ -56,10 +36,10 @@ export default function OrderList() {
               <List>
                 {orders.map((order) => (
                   <ListItem
-                    key={order.id}
+                    key={order._id}
                     button
                     component={Link}
-                    to={`${url}/${order.id}`}
+                    to={`${url}/${order._id}`}
                   >
                     <ListItemText
                       primary={order.description}

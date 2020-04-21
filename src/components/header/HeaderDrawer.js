@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function AppMenu() {
+export default function HeaderDrawer() {
   const classes = useStyles();
 
   return (

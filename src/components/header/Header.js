@@ -6,7 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
-import AppMenu from './AppMenu';
+import HeaderDrawer from './HeaderDrawer';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -51,7 +51,7 @@ export default function Header() {
           disableBackdropTransition={!iOS}
           disableDiscovery={iOS}
         >
-          <AppMenu />
+          <HeaderDrawer />
         </SwipeableDrawer>
         <Toolbar>
           <IconButton

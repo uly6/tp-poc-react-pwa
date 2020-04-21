@@ -2,14 +2,14 @@ import React from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
 import { makeStyles } from '@material-ui/core/styles';
-import Header from './Header';
 import {
   HashRouter as Router,
   Route,
   Switch,
 } from 'react-router-dom';
-import OrderRouter from '../orders/OrderRouter';
-import Home from '../home/Home';
+import Header from './components/header/Header';
+import OrderIndex from './components/orders/OrderIndex';
+import Home from './components/home/Home';
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -34,7 +34,7 @@ export default function App() {
               <Home />
             </Route>
             <Route path="/orders">
-              <OrderRouter />
+              <OrderIndex />
             </Route>
           </Switch>
         </main>
