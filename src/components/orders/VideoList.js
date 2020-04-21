@@ -91,21 +91,25 @@ export default function VideoList({ orderId }) {
               </ListSubheader>
             </GridListTile>
             {videos &&
-              videos.map((image) => (
-                <GridListTile key={image._id} cols={1}>
-                  <video
-                    height={180}
-                    controls={false}
-                    src={URL.createObjectURL(
-                      image._attachments.file.data,
-                    )}
-                  />
+              videos.map((video) => (
+                <GridListTile key={video._id} cols={1}>
+                  <video height={180} controls={false}>
+                    <source
+                      type={video._attachments.file.content_type}
+                      src={URL.createObjectURL(
+                        video._attachments.file.data,
+                      )}
+                    />
+                    <p>
+                      This browser does not support the video element
+                    </p>
+                  </video>
                   <GridListTileBar
-                    title={image.name}
+                    title={video.name}
                     actionIcon={
                       <IconButton
                         className={classes.icon}
-                        onClick={handleDeleteVideo(image)}
+                        onClick={handleDeleteVideo(video)}
                       >
                         <DeleteIcon />
                       </IconButton>
