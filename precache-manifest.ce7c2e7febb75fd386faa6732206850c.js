@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "82acd027273d182f5e2c260ddfbf63f7",
+    "revision": "4c005b62097cc1d1296bac903e753569",
     "url": "/tp-poc-react-pwa/index.html"
   },
   {
