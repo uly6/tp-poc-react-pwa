@@ -8,7 +8,7 @@ function convertDMSToDD(degrees, minutes, seconds, direction) {
   return dd;
 }
 
-export function getGeolocation(tags) {
+function parseGeolocationTags(tags) {
   const {
     GPSLatitude,
     GPSLatitudeRef,
@@ -52,15 +52,53 @@ export function getGeolocation(tags) {
   return {
     lat,
     lng,
+    origin: 'EXIF',
   };
 }
 
-export function getGeolocationFromImage(imageFile) {
+export const getGeolocationFromImage = (imageFile) => {
   return new Promise((resolve, reject) => {
     EXIF.getData(imageFile, function () {
       const allMetaData = EXIF.getAllTags(this);
       console.log('==>> EXIF ALL', allMetaData);
-      resolve(getGeolocation(allMetaData));
+      resolve(parseGeolocationTags(allMetaData));
     });
   });
-}
+};
+
+export const getGeoloacationFromDevice = () => {
+  return new Promise((resolve, reject) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        // success
+        (position) => {
+          console.log(position);
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            origin: 'DEVICE',
+          });
+        },
+        // error
+        (err) => {
+          reject(err);
+          // error.code can be:
+          //   0: unknown error
+          //   1: permission denied
+          //   2: position unavailable (error response from location provider)
+          //   3: timed out
+        },
+        // options
+        {
+          timeout: 5000,
+          // enableHighAccuracy: true, // slower to resolve and uses more battery
+        },
+      );
+    } else {
+      console.log(
+        'Geolocation is not supported for this Browser/OS.',
+      );
+      reject();
+    }
+  });
+};

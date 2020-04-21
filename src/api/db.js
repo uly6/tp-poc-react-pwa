@@ -1,7 +1,10 @@
 import PouchDB from 'pouchdb';
 import PouchFindPlugin from 'pouchdb-find';
 import * as shortid from 'shortid';
-import { getGeolocationFromImage } from '../utils/image';
+import {
+  getGeolocationFromImage,
+  getGeoloacationFromDevice,
+} from '../utils/geolocation';
 
 shortid.characters(
   '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@',
@@ -213,9 +216,13 @@ export async function addImage(orderId, imageFile) {
   const { name, type } = imageFile;
 
   try {
-    const location = type.includes('image')
-      ? await getGeolocationFromImage(imageFile)
-      : null;
+    // try to retrieve location from EXIF tags
+    let location = await getGeolocationFromImage(imageFile);
+
+    // ask current location from device
+    if (!location) {
+      location = await getGeoloacationFromDevice();
+    }
 
     // inline attachment
     const doc = {
