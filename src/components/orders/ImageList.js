@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   makeStyles,
   IconButton,
@@ -8,6 +8,7 @@ import {
   GridList,
   GridListTile,
   GridListTileBar,
+  Backdrop,
 } from '@material-ui/core';
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
 // import LocationOnIcon from '@material-ui/icons/LocationOn';
@@ -22,6 +23,14 @@ const useStyles = makeStyles((theme) => ({
   icon: {
     color: 'rgba(255, 255, 255, 0.54)',
   },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
+  backdropContent: {
+    maxWidth: '95%',
+    maxHeight: '95%',
+  },
 }));
 
 export default function ImageList({ orderId }) {
@@ -31,6 +40,19 @@ export default function ImageList({ orderId }) {
     orderId,
     [],
   );
+  const [open, setOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(false);
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleOpenImage = (image) => () => {
+    // clicked image
+    setSelectedImage(image);
+    // open backdrop
+    setOpen(!open);
+  };
 
   const onChangeImageUpload = async (event) => {
     const element = document.getElementById('input-image-file');
@@ -73,6 +95,22 @@ export default function ImageList({ orderId }) {
 
   return (
     <>
+      {/* BACKDROP */}
+
+      <Backdrop
+        className={classes.backdrop}
+        open={open}
+        onClick={handleClose}
+      >
+        {selectedImage && (
+          <img
+            className={classes.backdropContent}
+            src={selectedImage}
+            alt=""
+          />
+        )}
+      </Backdrop>
+
       {/* ACTIONS */}
 
       <Grid item container xs={12} direction="row" justify="flex-end">
@@ -117,32 +155,36 @@ export default function ImageList({ orderId }) {
             </GridListTile>
 
             {images &&
-              images.map((image) => (
-                <GridListTile key={image._id} cols={1}>
-                  <img
-                    src={URL.createObjectURL(
-                      image._attachments.file.data,
-                    )}
-                    alt={image.name}
-                  />
-                  <GridListTileBar
-                    title={image.name}
-                    subtitle={
-                      image.location
-                        ? `${image.location.lat}, ${image.location.lng}`
-                        : 'No location'
-                    }
-                    actionIcon={
-                      <IconButton
-                        className={classes.icon}
-                        onClick={handleDeleteImage(image)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    }
-                  />
-                </GridListTile>
-              ))}
+              images.map((image) => {
+                const imageURL = URL.createObjectURL(
+                  image._attachments.file.data,
+                );
+                return (
+                  <GridListTile
+                    key={image._id}
+                    cols={1}
+                    onClick={handleOpenImage(imageURL)}
+                  >
+                    <img src={imageURL} alt={image.name} />
+                    <GridListTileBar
+                      title={image.name}
+                      subtitle={
+                        image.location
+                          ? `${image.location.lat}, ${image.location.lng}`
+                          : 'No location'
+                      }
+                      actionIcon={
+                        <IconButton
+                          className={classes.icon}
+                          onClick={handleDeleteImage(image)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      }
+                    />
+                  </GridListTile>
+                );
+              })}
           </GridList>
         </Paper>
       </Grid>

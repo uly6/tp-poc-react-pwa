@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   makeStyles,
   IconButton,
@@ -8,6 +8,7 @@ import {
   GridList,
   GridListTile,
   GridListTileBar,
+  Backdrop,
 } from '@material-ui/core';
 import VideocamIcon from '@material-ui/icons/Videocam';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -21,6 +22,14 @@ const useStyles = makeStyles((theme) => ({
   icon: {
     color: 'rgba(255, 255, 255, 0.54)',
   },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
+  backdropContent: {
+    maxWidth: '95%',
+    maxHeight: '95%',
+  },
 }));
 
 export default function VideoList({ orderId }) {
@@ -30,6 +39,20 @@ export default function VideoList({ orderId }) {
     orderId,
     [],
   );
+  const [open, setOpen] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState('');
+
+  const handleClose = () => {
+    setSelectedVideo('');
+    setOpen(false);
+  };
+
+  const handleOpenVideo = (video) => () => {
+    // clicked video
+    setSelectedVideo(video);
+    // open backdrop
+    setOpen(!open);
+  };
 
   const onChangeImageUpload = async (event) => {
     const element = document.getElementById('input-video-file');
@@ -48,6 +71,21 @@ export default function VideoList({ orderId }) {
 
   return (
     <>
+      {/* BACKDROP */}
+
+      <Backdrop
+        className={classes.backdrop}
+        open={open}
+        onClick={handleClose}
+      >
+        {selectedVideo && (
+          <video controls className={classes.backdropContent}>
+            <source src={selectedVideo} />
+            <p>This browser does not support the video element</p>
+          </video>
+        )}
+      </Backdrop>
+
       {/* ACTIONS */}
 
       <Grid item container xs={12} direction="row" justify="flex-end">
@@ -91,32 +129,40 @@ export default function VideoList({ orderId }) {
               </ListSubheader>
             </GridListTile>
             {videos &&
-              videos.map((video) => (
-                <GridListTile key={video._id} cols={1}>
-                  <video height={180} controls={false}>
-                    <source
-                      type={video._attachments.file.content_type}
-                      src={URL.createObjectURL(
-                        video._attachments.file.data,
-                      )}
+              videos.map((video) => {
+                const videoURL = URL.createObjectURL(
+                  video._attachments.file.data,
+                );
+                return (
+                  <GridListTile
+                    key={video._id}
+                    cols={1}
+                    onClick={handleOpenVideo(videoURL)}
+                  >
+                    <video height={180} controls={false}>
+                      <source
+                        type={video._attachments.file.content_type}
+                        src={videoURL}
+                      />
+                      <p>
+                        This browser does not support the video
+                        element
+                      </p>
+                    </video>
+                    <GridListTileBar
+                      title={video.name}
+                      actionIcon={
+                        <IconButton
+                          className={classes.icon}
+                          onClick={handleDeleteVideo(video)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      }
                     />
-                    <p>
-                      This browser does not support the video element
-                    </p>
-                  </video>
-                  <GridListTileBar
-                    title={video.name}
-                    actionIcon={
-                      <IconButton
-                        className={classes.icon}
-                        onClick={handleDeleteVideo(video)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    }
-                  />
-                </GridListTile>
-              ))}
+                  </GridListTile>
+                );
+              })}
           </GridList>
         </Paper>
       </Grid>
