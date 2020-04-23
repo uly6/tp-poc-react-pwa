@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   makeStyles,
   IconButton,
@@ -15,6 +15,7 @@ import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { useGetImagesByOrderId } from './hooks';
 import { addImage, deleteImage } from '../../api/db';
+import { SnackBarContext } from '../../context/SnackBarProvider';
 
 const useStyles = makeStyles((theme) => ({
   inputFile: {
@@ -36,6 +37,10 @@ const useStyles = makeStyles((theme) => ({
 export default function ImageList({ orderId }) {
   const classes = useStyles();
 
+  const { showSuccessAlert, showErrorAlert } = useContext(
+    SnackBarContext,
+  );
+
   const [images, isLoading, isError, reload] = useGetImagesByOrderId(
     orderId,
     [],
@@ -55,18 +60,30 @@ export default function ImageList({ orderId }) {
   };
 
   const onChangeImageUpload = async (event) => {
-    const element = document.getElementById('input-image-file');
-    if (element.files && element.files[0]) {
-      await addImage(orderId, element.files[0]);
-      reload();
+    try {
+      const element = document.getElementById('input-image-file');
+      if (element.files && element.files[0]) {
+        await addImage(orderId, element.files[0]);
+        reload();
+        // show message
+        showSuccessAlert('Image uploaded');
+      }
+    } catch (err) {
+      showErrorAlert(`Error uploading image (${err.message})`);
     }
   };
 
   const handleDeleteImage = (image) => async (event) => {
-    // delete
-    await deleteImage(image);
-    // reload images
-    reload();
+    try {
+      // delete
+      await deleteImage(image);
+      // reload images
+      reload();
+      // show message
+      showSuccessAlert('Image removed');
+    } catch (err) {
+      showErrorAlert(`Error removing image (${err.message})`);
+    }
   };
 
   // const onClickMap = (data) => (event) => {

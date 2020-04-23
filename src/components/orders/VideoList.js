@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   makeStyles,
   IconButton,
@@ -14,6 +14,7 @@ import VideocamIcon from '@material-ui/icons/Videocam';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { useGetVideosByOrderId } from './hooks';
 import { addVideo, deleteVideo } from '../../api/db';
+import { SnackBarContext } from '../../context/SnackBarProvider';
 
 const useStyles = makeStyles((theme) => ({
   inputFile: {
@@ -35,6 +36,10 @@ const useStyles = makeStyles((theme) => ({
 export default function VideoList({ orderId }) {
   const classes = useStyles();
 
+  const { showSuccessAlert, showErrorAlert } = useContext(
+    SnackBarContext,
+  );
+
   const [videos, isLoading, isError, reload] = useGetVideosByOrderId(
     orderId,
     [],
@@ -54,19 +59,31 @@ export default function VideoList({ orderId }) {
     setOpen(!open);
   };
 
-  const onChangeImageUpload = async (event) => {
-    const element = document.getElementById('input-video-file');
-    if (element.files && element.files[0]) {
-      await addVideo(orderId, element.files[0]);
-      reload();
+  const onChangeVideoUpload = async (event) => {
+    try {
+      const element = document.getElementById('input-video-file');
+      if (element.files && element.files[0]) {
+        await addVideo(orderId, element.files[0]);
+        reload();
+        // show message
+        showSuccessAlert('Video uploaded');
+      }
+    } catch (err) {
+      showErrorAlert(`Error uploading video (${err.message})`);
     }
   };
 
   const handleDeleteVideo = (video) => async (event) => {
-    // delete
-    await deleteVideo(video);
-    // reload videos
-    reload();
+    try {
+      // delete
+      await deleteVideo(video);
+      // reload videos
+      reload();
+      // show message
+      showSuccessAlert('Video removed');
+    } catch (err) {
+      showErrorAlert(`Error removing video (${err.message})`);
+    }
   };
 
   return (
@@ -95,7 +112,7 @@ export default function VideoList({ orderId }) {
             accept="video/*"
             id="input-video-file"
             className={classes.inputFile}
-            onChange={onChangeImageUpload}
+            onChange={onChangeVideoUpload}
           />
           <label htmlFor="input-video-file">
             <IconButton color="primary" component="span">

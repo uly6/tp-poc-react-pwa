@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Grid,
   Typography,
   Button,
   CircularProgress,
+  Paper,
 } from '@material-ui/core';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
@@ -18,18 +19,19 @@ import {
   addTask,
   syncToRemote,
 } from '../../api/db';
+import { SnackBarContext } from '../../context/SnackBarProvider';
 
 export default function Home() {
+  const { showSuccessAlert, showErrorAlert } = useContext(
+    SnackBarContext,
+  );
+
   // load sync metadata
   const [syncMetadata, setSyncMetadata] = useState(
     DEFAULT_SYNC_METADATA,
   );
 
-  const [inProgress, setInProgress] = useState({
-    loading: false,
-    message: '',
-    err: false,
-  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchSyncMetadata() {
@@ -45,10 +47,7 @@ export default function Home() {
 
   const onClickDownload = async (event) => {
     try {
-      setInProgress({
-        loading: true,
-        message: 'Loading data from server',
-      });
+      setLoading(true);
 
       // fetch data from web api
       const orders = await fetchOrders();
@@ -86,26 +85,18 @@ export default function Home() {
         setSyncMetadata(updatedMetadata);
       }
 
-      setInProgress({
-        loading: false,
-        message: 'Loaded data from server successfuly',
-      });
+      showSuccessAlert('Data loaded from server successfuly');
     } catch (err) {
-      setInProgress({
-        loading: false,
-        error: true,
-        message: 'Error loading data from server',
-      });
+      showErrorAlert('Error loading data from server');
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const onClickUpload = async (event) => {
     try {
-      setInProgress({
-        loading: true,
-        message: 'Syncing data back to server',
-      });
+      setLoading(true);
 
       await syncToRemote();
 
@@ -120,26 +111,18 @@ export default function Home() {
       // // update sync metadata state
       setSyncMetadata(updatedMetadata);
 
-      setInProgress({
-        loading: false,
-        message: 'Data synced back to server successfuly',
-      });
+      showSuccessAlert('Data synced back to server successfuly');
     } catch (err) {
-      setInProgress({
-        loading: false,
-        error: true,
-        message: 'Error syncing data back to server',
-      });
+      showErrorAlert('Error syncing data back to server');
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const onClickDelete = async (event) => {
     try {
-      setInProgress({
-        loading: true,
-        message: 'Cleaning local database',
-      });
+      setLoading(true);
 
       // delete databases
       const result = await cleanDatabases();
@@ -148,17 +131,12 @@ export default function Home() {
       // restore sync metadata default
       setSyncMetadata(await getSyncMetadata());
 
-      setInProgress({
-        loading: false,
-        message: 'Local database cleaned successfuly',
-      });
+      showSuccessAlert('Local database cleaned successfuly');
     } catch (err) {
-      setInProgress({
-        loading: false,
-        error: true,
-        message: 'Error cleaning local database',
-      });
+      showErrorAlert('Error cleaning local database');
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -174,7 +152,7 @@ export default function Home() {
             color="default"
             startIcon={<CloudDownloadIcon />}
             onClick={onClickDownload}
-            disabled={syncMetadata.downloadDisabled}
+            disabled={syncMetadata.downloadDisabled || loading}
           >
             Load data from server
           </Button>
@@ -185,7 +163,7 @@ export default function Home() {
             color="default"
             startIcon={<CloudUploadIcon />}
             onClick={onClickUpload}
-            disabled={syncMetadata.uploadDisabled}
+            disabled={syncMetadata.uploadDisabled || loading}
           >
             Sync local data to server
           </Button>
@@ -196,16 +174,23 @@ export default function Home() {
             color="default"
             startIcon={<DeleteIcon />}
             onClick={onClickDelete}
-            disabled={syncMetadata.deleteDisabled}
+            disabled={syncMetadata.deleteDisabled || loading}
           >
             Clean my local data
           </Button>
         </Grid>
-        <Grid item xs={12}>
-          {inProgress.loading && <CircularProgress size={17} />}
-          {'  '}
-          {inProgress.message && <span>{inProgress.message}</span>}
-        </Grid>
+        {loading && (
+          <Grid
+            item
+            xs={12}
+            container
+            direction="column"
+            justify="center"
+            alignItems="center"
+          >
+            <CircularProgress size={40} style={{ marginTop: 50 }} />
+          </Grid>
+        )}
       </Grid>
     </div>
   );

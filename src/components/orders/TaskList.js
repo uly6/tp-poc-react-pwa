@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   IconButton,
   Paper,
@@ -20,8 +20,12 @@ import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { useGetTasksByOrderId } from './hooks';
 import { updateTask, addTask, deleteTask } from '../../api/db';
+import { SnackBarContext } from '../../context/SnackBarProvider';
 
 export default function TaskList({ orderId }) {
+  const { showSuccessAlert, showErrorAlert } = useContext(
+    SnackBarContext,
+  );
   const [tasks, isLoading, isError, reload] = useGetTasksByOrderId(
     orderId,
     [],
@@ -42,30 +46,46 @@ export default function TaskList({ orderId }) {
   };
 
   const handleAddTask = async () => {
-    // save task
-    await addTask({
-      orderId,
-      description: newTaskDescription,
-    });
-    // close dialog
-    handleClose();
-    // reload tasks
-    reload();
+    try {
+      // save task
+      await addTask({
+        orderId,
+        description: newTaskDescription,
+      });
+      // close dialog
+      handleClose();
+      // reload tasks
+      reload();
+      // show message
+      showSuccessAlert('Task added');
+    } catch (err) {
+      showErrorAlert(`Error addding task (${err.message})`);
+    }
   };
 
   const handleCompleteTask = (task) => async (event) => {
-    await updateTask({
-      ...task,
-      completed: event.target.checked,
-    });
-    reload();
+    try {
+      await updateTask({
+        ...task,
+        completed: event.target.checked,
+      });
+      reload();
+    } catch (err) {
+      showErrorAlert(`Error completiing task (${err.message})`);
+    }
   };
 
   const handleDeleteTask = (task) => async (event) => {
-    // delete task
-    await deleteTask(task);
-    // reload tasks
-    reload();
+    try {
+      // delete task
+      await deleteTask(task);
+      // reload tasks
+      reload();
+      // show message
+      showSuccessAlert('Task removed');
+    } catch (err) {
+      showErrorAlert(`Error removing task (${err.message})`);
+    }
   };
 
   return (

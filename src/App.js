@@ -10,6 +10,7 @@ import {
 import Header from './components/header/Header';
 import OrderIndex from './components/orders/OrderIndex';
 import Home from './components/home/Home';
+import { SnackBarProvider } from './context/SnackBarProvider';
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -26,19 +27,21 @@ export default function App() {
   return (
     <Router basename="/">
       <CssBaseline />
-      <Header />
-      <Container maxWidth="md">
-        <main className={classes.main}>
-          <Switch>
-            <Route exact path="/">
-              <Home />
-            </Route>
-            <Route path="/orders">
-              <OrderIndex />
-            </Route>
-          </Switch>
-        </main>
-      </Container>
+      <SnackBarProvider>
+        <Header />
+        <Container maxWidth="md">
+          <main className={classes.main}>
+            <Switch>
+              <Route exact path="/">
+                <Home />
+              </Route>
+              <Route path="/orders">
+                <OrderIndex />
+              </Route>
+            </Switch>
+          </main>
+        </Container>
+      </SnackBarProvider>
     </Router>
   );
 }

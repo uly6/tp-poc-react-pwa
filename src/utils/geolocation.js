@@ -81,7 +81,8 @@ export const getGeoloacationFromDevice = () => {
         },
         // error
         (err) => {
-          reject(err);
+          // reject(err);
+          resolve(null);
           // error.code can be:
           //   0: unknown error
           //   1: permission denied
@@ -90,7 +91,7 @@ export const getGeoloacationFromDevice = () => {
         },
         // options
         {
-          timeout: 5000,
+          timeout: 10000,
           // enableHighAccuracy: true, // slower to resolve and uses more battery
         },
       );
