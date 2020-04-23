@@ -7,6 +7,7 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import HeaderDrawer from './HeaderDrawer';
+import { HeaderWifiIcon } from './HeaderWifiIcon';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -66,6 +67,7 @@ export default function Header() {
           <Typography variant="h6" className={classes.title}>
             My Work App
           </Typography>
+          <HeaderWifiIcon/>
         </Toolbar>
       </AppBar>
     </div>
