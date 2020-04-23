@@ -35,62 +35,133 @@ export const DEFAULT_SYNC_METADATA = {
   deletedAt: '',
 };
 
+// ####################################
+// DATABASES
+// ####################################
+
 let syncMetadataStore;
 let ordersStore;
 let imagesStore;
 let videosStore;
 let tasksStore;
 
-function getSyncMetadataStore() {
-  if (!syncMetadataStore) {
+async function getSyncMetadataStore(forceNew = false) {
+  if (!syncMetadataStore || forceNew) {
     syncMetadataStore = new PouchDB(SYNC_METADATA);
   }
   return syncMetadataStore;
 }
 
-function getOrdersStore() {
-  if (!ordersStore) {
+async function getOrdersStore(forceNew = false) {
+  if (!ordersStore || forceNew) {
     ordersStore = new PouchDB(ORDERS);
 
-    ordersStore.createIndex({
+    await ordersStore.createIndex({
       index: { fields: ['createdAt'] },
     });
   }
   return ordersStore;
 }
 
-function getTasksStore() {
-  if (!tasksStore) {
+async function getTasksStore(forceNew = false) {
+  if (!tasksStore || forceNew) {
     tasksStore = new PouchDB(TASKS);
 
-    tasksStore.createIndex({
+    await tasksStore.createIndex({
       index: { fields: ['createdAt', 'orderId'] },
     });
   }
   return tasksStore;
 }
 
-function getImagesStore() {
-  if (!imagesStore) {
+async function getImagesStore(forceNew = false) {
+  if (!imagesStore || forceNew) {
     imagesStore = new PouchDB(IMAGES);
 
-    imagesStore.createIndex({
+    await imagesStore.createIndex({
       index: { fields: ['createdAt', 'orderId'] },
     });
   }
   return imagesStore;
 }
 
-function getVideosStore() {
-  if (!videosStore) {
+async function getVideosStore(forceNew = false) {
+  if (!videosStore || forceNew) {
     videosStore = new PouchDB(VIDEOS);
 
-    videosStore.createIndex({
+    await videosStore.createIndex({
       index: { fields: ['createdAt', 'orderId'] },
     });
   }
   return videosStore;
 }
+
+export async function cleanDatabases() {
+  const metadataResult = await cleanDatabase(getSyncMetadataStore);
+  const orderResult = await cleanDatabase(getOrdersStore);
+  const taskResult = await cleanDatabase(getTasksStore);
+  const imagesResult = await cleanDatabase(getImagesStore);
+  const videosResult = await cleanDatabase(getVideosStore);
+
+  return {
+    metadata: metadataResult.ok,
+    orders: orderResult.ok,
+    tasks: taskResult.ok,
+    images: imagesResult.ok,
+    video: videosResult.ok,
+  };
+}
+
+async function cleanDatabase(getStoreFn) {
+  // delete the store
+  const store = await getStoreFn();
+  const result = await store.destroy();
+  if (result.ok) {
+    // re-create
+    await getStoreFn(true);
+  }
+  return result;
+}
+
+// ####################################
+// SYNC LOCAL DATA TO SERVER
+// ####################################
+
+export const syncToRemote = async () => {
+  // tasks
+  await syncStoreToRemote(TASKS, getTasksStore);
+
+  // images
+  await syncStoreToRemote(IMAGES, getImagesStore);
+
+  // videos
+  await syncStoreToRemote(VIDEOS, getVideosStore);
+
+  return Promise.resolve();
+};
+
+const syncStoreToRemote = async (remoteName, getLocalStoreFn) => {
+  const remoteDB = new PouchDB(
+    `https://tp-poc-pouchdb-server.herokuapp.com/${remoteName}`,
+  );
+  console.log(await remoteDB.info());
+
+  const localStore = await getLocalStoreFn();
+
+  return new Promise((resolve, reject) => {
+    localStore.replicate
+      .to(remoteDB)
+      .on('complete', () => {
+        console.log(remoteName, 'SYNC COMPLETED');
+        resolve();
+      })
+      .on('error', (err) => {
+        console.log(remoteName, 'SYNC ERROR');
+        console.error(err);
+        reject(err);
+      });
+  });
+};
 
 // ####################################
 // SYNC METADATA STORE
@@ -98,7 +169,8 @@ function getVideosStore() {
 
 export async function getSyncMetadata() {
   try {
-    return await getSyncMetadataStore().get('default');
+    const db = await getSyncMetadataStore();
+    return await db.get('default');
   } catch (err) {
     if (err && err.name === 'not_found') {
       return DEFAULT_SYNC_METADATA;
@@ -107,45 +179,16 @@ export async function getSyncMetadata() {
 }
 
 export async function updateSyncMetadata(data) {
+  const db = await getSyncMetadataStore();
   const previous = await getSyncMetadata();
   const doc =
     previous && previous._rev
       ? { ...data, _rev: previous._rev }
       : data;
-
   // update
-  await getSyncMetadataStore().put(doc);
-
+  await db.put(doc);
   // return updated version
-  return await getSyncMetadataStore().get('default');
-}
-
-export async function cleanDatabases() {
-  // delete the order store
-  let result = await getOrdersStore().destroy();
-  if (result.ok) {
-    ordersStore = null;
-  }
-
-  // delete the tasks store
-  result = await getTasksStore().destroy();
-  if (result.ok) {
-    tasksStore = null;
-  }
-
-  // delete the images store
-  result = await getImagesStore().destroy();
-  if (result.ok) {
-    imagesStore = null;
-  }
-
-  // delete the videos store
-  result = await getVideosStore().destroy();
-  if (result.ok) {
-    videosStore = null;
-  }
-
-  return result;
+  return await db.get('default');
 }
 
 // ####################################
@@ -153,7 +196,8 @@ export async function cleanDatabases() {
 // ####################################
 
 export async function getOrders() {
-  const result = await getOrdersStore().find({
+  const db = await getOrdersStore();
+  const result = await db.find({
     selector: {
       createdAt: { $gte: null },
     },
@@ -163,164 +207,16 @@ export async function getOrders() {
 }
 
 export async function getOrderById(id) {
-  return await getOrdersStore().get(id);
+  const db = await getOrdersStore();
+  return await db.get(id);
 }
 
 export async function addOrder(order) {
-  let doc;
-  // pouch ex[ect a _id field
-  if (order.id) {
-    doc = { ...order, _id: order.id };
-  }
+  const db = await getOrdersStore();
   // save
-  const result = await getOrdersStore().put(doc);
+  const result = await db.put(order);
   // return the most recebt version
   return getOrderById(result.id);
-}
-
-// ####################################
-// IMAGES STORE
-// ####################################
-
-export async function getImagesByOrderId(orderId) {
-  // find does not return the attachments
-  const response = await getImagesStore().find({
-    selector: {
-      orderId,
-      createdAt: { $gte: null },
-    },
-    sort: ['createdAt'],
-  });
-
-  // collect all ids
-  const ids = response.docs.map((doc) => doc._id);
-
-  const result = await getImagesStore().allDocs({
-    keys: ids,
-    include_docs: true,
-    attachments: true,
-    binary: true,
-  });
-
-  return result.rows.map((row) => row.doc);
-}
-
-export async function getImageById(id) {
-  return await getImagesStore().get(id, {
-    attachments: true,
-    binary: true,
-  });
-}
-
-export async function addImage(orderId, imageFile) {
-  const { name, type } = imageFile;
-
-  try {
-    // try to retrieve location from EXIF tags
-    let location = await getGeolocationFromImage(imageFile);
-
-    // ask current location from device
-    if (!location) {
-      location = await getGeoloacationFromDevice();
-    }
-
-    // inline attachment
-    const doc = {
-      _id: shortid.generate(),
-      orderId,
-      name,
-      location,
-      createdAt: new Date().toISOString(),
-      _attachments: {
-        file: {
-          content_type: type,
-          data: imageFile,
-        },
-      },
-    };
-    // save
-    const result = await getImagesStore().put(doc);
-
-    // return saved image
-    return getImageById(result.id);
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-export async function deleteImage(image) {
-  // load latest rev
-  const doc = await getImagesStore().get(image._id);
-  // remove
-  return getImagesStore().remove(doc);
-}
-
-// ####################################
-// VIDEOS STORE
-// ####################################
-
-export async function getVideosByOrderId(orderId) {
-  // find does not return the attachments
-  const response = await getVideosStore().find({
-    selector: {
-      orderId,
-      createdAt: { $gte: null },
-    },
-    sort: ['createdAt'],
-  });
-
-  // collect all ids
-  const ids = response.docs.map((doc) => doc._id);
-
-  const result = await getVideosStore().allDocs({
-    keys: ids,
-    include_docs: true,
-    attachments: true,
-    binary: true,
-  });
-
-  return result.rows.map((row) => row.doc);
-}
-
-export async function getVideoById(id) {
-  return await getVideosStore().get(id, {
-    attachments: true,
-    binary: true,
-  });
-}
-
-export async function addVideo(orderId, imageFile) {
-  const { name, type } = imageFile;
-
-  try {
-    // inline attachment
-    const doc = {
-      _id: shortid.generate(),
-      orderId,
-      name,
-      createdAt: new Date().toISOString(),
-      _attachments: {
-        file: {
-          content_type: type,
-          data: imageFile,
-        },
-      },
-    };
-    // save
-    const result = await getVideosStore().put(doc);
-
-    // return saved image
-    return getVideoById(result.id);
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-export async function deleteVideo(video) {
-  // load latest rev
-  const doc = await getVideosStore().get(video._id);
-  // remove
-  return getVideosStore().remove(doc);
 }
 
 // ####################################
@@ -328,66 +224,194 @@ export async function deleteVideo(video) {
 // ####################################
 
 export async function getTasksByOrderId(orderId) {
-  const response = await getTasksStore().find({
+  const db = await getTasksStore();
+  const response = await db.find({
     selector: {
       orderId,
       createdAt: { $gte: null },
     },
     sort: ['createdAt'],
   });
-
   // collect all ids
   const ids = response.docs.map((doc) => doc._id);
-
-  const result = await getTasksStore().allDocs({
+  // get by ids
+  const result = await db.allDocs({
     keys: ids,
     include_docs: true,
   });
-
   return result.rows.map((row) => row.doc);
 }
 
 export async function getTaskById(id) {
-  return await getTasksStore().get(id);
+  const db = await getTasksStore();
+  return await db.get(id);
 }
 
 export async function addTask(task) {
-  try {
-    // save
-    const result = await getTasksStore().put({
-      ...task,
-      _id: shortid.generate(),
-      createdAt: new Date().toISOString(),
-      completed: false,
-    });
-
-    // return saved doc
-    return getTaskById(result.id);
-  } catch (err) {
-    console.error(err);
-  }
+  const db = await getTasksStore();
+  // save
+  const result = await db.put({
+    ...task,
+    _id: shortid.generate(),
+    createdAt: new Date().toISOString(),
+    completed: false,
+  });
+  // return saved doc
+  return getTaskById(result.id);
 }
 
 export async function updateTask(task) {
-  try {
-    // get task
-    const { _rev } = await getTaskById(task._id);
-    // save
-    const result = await getTasksStore().put({
-      ...task,
-      _rev,
-    });
-
-    // return saved doc
-    return getTaskById(result.id);
-  } catch (err) {
-    console.error(err);
-  }
+  const db = await getTasksStore();
+  // get task
+  const { _rev } = await getTaskById(task._id);
+  // save
+  const result = await db.put({
+    ...task,
+    _rev,
+  });
+  // return saved doc
+  return getTaskById(result.id);
 }
 
 export async function deleteTask(task) {
+  const db = await getTasksStore();
   // load latest rev
-  const doc = await getTasksStore().get(task._id);
+  const doc = await db.get(task._id);
   // remove
-  return getTasksStore().remove(doc);
+  return db.remove(doc);
+}
+
+// ####################################
+// IMAGES STORE
+// ####################################
+
+export async function getImagesByOrderId(orderId) {
+  const db = await getImagesStore();
+  // find does not return the attachments
+  const response = await db.find({
+    selector: {
+      orderId,
+      createdAt: { $gte: null },
+    },
+    sort: ['createdAt'],
+  });
+  // collect all ids
+  const ids = response.docs.map((doc) => doc._id);
+  // get by ids
+  const result = await db.allDocs({
+    keys: ids,
+    include_docs: true,
+    attachments: true,
+    binary: true,
+  });
+  return result.rows.map((row) => row.doc);
+}
+
+export async function getImageById(id) {
+  const db = await getImagesStore();
+  return await db.get(id, {
+    attachments: true,
+    binary: true,
+  });
+}
+
+export async function addImage(orderId, imageFile) {
+  const db = await getImagesStore();
+  const { name, type } = imageFile;
+  // try to retrieve location from EXIF tags
+  let location = await getGeolocationFromImage(imageFile);
+  // ask current location from device
+  if (!location) {
+    location = await getGeoloacationFromDevice();
+  }
+  // inline attachment
+  const doc = {
+    _id: shortid.generate(),
+    orderId,
+    name,
+    location,
+    createdAt: new Date().toISOString(),
+    _attachments: {
+      file: {
+        content_type: type,
+        data: imageFile,
+      },
+    },
+  };
+  // save
+  const result = await db.put(doc);
+  // return saved image
+  return getImageById(result.id);
+}
+
+export async function deleteImage(image) {
+  const db = await getImagesStore();
+  // load latest rev
+  const doc = await db.get(image._id);
+  // remove
+  return db.remove(doc);
+}
+
+// ####################################
+// VIDEOS STORE
+// ####################################
+
+export async function getVideosByOrderId(orderId) {
+  const db = await getVideosStore();
+  // find does not return the attachments
+  const response = await db.find({
+    selector: {
+      orderId,
+      createdAt: { $gte: null },
+    },
+    sort: ['createdAt'],
+  });
+  // collect all ids
+  const ids = response.docs.map((doc) => doc._id);
+  // get by ids
+  const result = await db.allDocs({
+    keys: ids,
+    include_docs: true,
+    attachments: true,
+    binary: true,
+  });
+  return result.rows.map((row) => row.doc);
+}
+
+export async function getVideoById(id) {
+  const db = await getVideosStore();
+  return await db.get(id, {
+    attachments: true,
+    binary: true,
+  });
+}
+
+export async function addVideo(orderId, imageFile) {
+  const db = await getVideosStore();
+  const { name, type } = imageFile;
+  // inline attachment
+  const doc = {
+    _id: shortid.generate(),
+    orderId,
+    name,
+    createdAt: new Date().toISOString(),
+    _attachments: {
+      file: {
+        content_type: type,
+        data: imageFile,
+      },
+    },
+  };
+  // save
+  const result = await db.put(doc);
+  // return saved image
+  return getVideoById(result.id);
+}
+
+export async function deleteVideo(video) {
+  const db = await getVideosStore();
+  // load latest rev
+  const doc = await db.get(video._id);
+  // remove
+  return db.remove(doc);
 }

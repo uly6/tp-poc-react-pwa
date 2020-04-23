@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  makeStyles,
   Grid,
   Typography,
   Button,
@@ -17,27 +16,20 @@ import {
   updateSyncMetadata,
   cleanDatabases,
   addTask,
+  syncToRemote,
 } from '../../api/db';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    // backgroundColor: theme.palette.background.paper,
-  },
-  button: {
-    marginRight: theme.spacing(2),
-  },
-}));
-
 export default function Home() {
-  const classes = useStyles();
-  // const [downloadDisabled, setDownloadDisabled] = useState(false);
-  // const [uploadDisabled, setUploadDisabled] = useState(true);
-  // const [deleteDisabled, setDeleteDisabled] = useState(true);
-
   // load sync metadata
   const [syncMetadata, setSyncMetadata] = useState(
     DEFAULT_SYNC_METADATA,
   );
+
+  const [inProgress, setInProgress] = useState({
+    loading: false,
+    message: '',
+    err: false,
+  });
 
   useEffect(() => {
     async function fetchSyncMetadata() {
@@ -51,49 +43,36 @@ export default function Home() {
     fetchSyncMetadata();
   }, []);
 
-  const [inProgress, setInProgress] = useState({
-    loading: false,
-    message: '',
-    err: false,
-  });
-
   const onClickDownload = async (event) => {
-    setInProgress({
-      loading: true,
-      message: 'Loading work orders from server',
-    });
-
     try {
+      setInProgress({
+        loading: true,
+        message: 'Loading data from server',
+      });
+
       // fetch data from web api
       const orders = await fetchOrders();
+
       if (orders.length > 0) {
-        setInProgress({
-          message: `Loading tasks for ${orders.length} work orders from server`,
-        });
-
-        setInProgress({
-          message: 'Saving work orders to local database',
-        });
-
         const ordersSavedToDb = await Promise.all(
-          orders.map((order) => addOrder(order)),
+          orders.map((order) =>
+            // pouchdb needs an _id as key
+            addOrder({ ...order, _id: order.id }),
+          ),
         );
 
-        setInProgress({
-          message: "Saving work orders' tasks to local database",
-        });
-
-        const orderIds = ordersSavedToDb.map((order) => order.id);
+        const orderIds = ordersSavedToDb.map((order) => order._id);
 
         const tasks = await Promise.all(
           orderIds.map((orderId) => fetchTasksByOrderId(orderId)),
         );
 
-        await Promise.all(tasks.flat().map((task) => addTask(task)));
-
-        setInProgress({
-          message: 'Finishing to save to local database',
-        });
+        // pouchdb needs an _id as key
+        await Promise.all(
+          tasks
+            .flat()
+            .map((task) => addTask({ ...task, _id: addTask.id })),
+        );
 
         // save metadata in the database
         const updatedMetadata = await updateSyncMetadata({
@@ -105,26 +84,19 @@ export default function Home() {
 
         // update sync metadata state
         setSyncMetadata(updatedMetadata);
-
-        setInProgress({
-          loading: false,
-          message: `Loaded ${ordersSavedToDb.length} work orders successfuly`,
-        });
-      } else {
-        setInProgress({
-          loading: false,
-          message: 'There are no work orders to load from server',
-        });
       }
-    } catch (err) {
-      console.error(err);
 
       setInProgress({
         loading: false,
-        error: true,
-        message:
-          'Error loading work orders from server. Please try again',
+        message: 'Loaded data from server successfuly',
       });
+    } catch (err) {
+      setInProgress({
+        loading: false,
+        error: true,
+        message: 'Error loading data from server',
+      });
+      console.error(err);
     }
   };
 
@@ -132,12 +104,10 @@ export default function Home() {
     try {
       setInProgress({
         loading: true,
-        message: 'Syncing work orders back to server',
+        message: 'Syncing data back to server',
       });
 
-      setInProgress({
-        message: 'Finishing sync back to server',
-      });
+      await syncToRemote();
 
       // save metadata in the database
       const updatedMetadata = await updateSyncMetadata({
@@ -147,20 +117,20 @@ export default function Home() {
         deleteDisabled: false,
       });
 
-      // update sync metadata state
+      // // update sync metadata state
       setSyncMetadata(updatedMetadata);
 
       setInProgress({
         loading: false,
-        message: 'Work orders synced back to server successfuly',
+        message: 'Data synced back to server successfuly',
       });
     } catch (err) {
       setInProgress({
         loading: false,
         error: true,
-        message:
-          'Error syncing work orders back to server. Please try again',
+        message: 'Error syncing data back to server',
       });
+      console.error(err);
     }
   };
 
@@ -172,22 +142,11 @@ export default function Home() {
       });
 
       // delete databases
-      await cleanDatabases();
+      const result = await cleanDatabases();
+      console.log(result);
 
-      setInProgress({
-        message: 'Finishing the cleaning of the local database',
-      });
-
-      // save metadata in the database
-      const updatedMetadata = await updateSyncMetadata({
-        ...syncMetadata,
-        downloadDisabled: false,
-        uploadDisabled: true,
-        deleteDisabled: true,
-      });
-
-      // update sync metadata state
-      setSyncMetadata(updatedMetadata);
+      // restore sync metadata default
+      setSyncMetadata(await getSyncMetadata());
 
       setInProgress({
         loading: false,
@@ -197,14 +156,14 @@ export default function Home() {
       setInProgress({
         loading: false,
         error: true,
-        message:
-          'Error cleaning the local database. Please try again',
+        message: 'Error cleaning local database',
       });
+      console.error(err);
     }
   };
 
   return (
-    <div className={classes.root}>
+    <div>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <Typography variant="h5">Home</Typography>
@@ -213,36 +172,33 @@ export default function Home() {
           <Button
             variant="contained"
             color="default"
-            className={classes.button}
             startIcon={<CloudDownloadIcon />}
             onClick={onClickDownload}
             disabled={syncMetadata.downloadDisabled}
           >
-            Download
+            Load data from server
           </Button>
         </Grid>
         <Grid item xs={12}>
           <Button
             variant="contained"
             color="default"
-            className={classes.button}
             startIcon={<CloudUploadIcon />}
             onClick={onClickUpload}
             disabled={syncMetadata.uploadDisabled}
           >
-            Upload (Not Working)
+            Sync local data to server
           </Button>
         </Grid>
         <Grid item xs={12}>
           <Button
             variant="contained"
             color="default"
-            className={classes.button}
             startIcon={<DeleteIcon />}
             onClick={onClickDelete}
             disabled={syncMetadata.deleteDisabled}
           >
-            Delete
+            Clean my local data
           </Button>
         </Grid>
         <Grid item xs={12}>
