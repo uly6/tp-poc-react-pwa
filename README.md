@@ -129,13 +129,10 @@ We decided to use PouchDB for 3 reasons:
 When we add the app to the home screen it works similarly as a native app, it has an icon, splash screen, and run in full screen without the browser address bar on top of navigation menu at the bottom.
 
 <img src="docs/images/a2hs_1.PNG" alt="Banner at the bottom" width="300"/>
-
 <img src="docs/images/a2hs_2.PNG" alt="Add to Home Screen prompt" width="300"/>
-
 <img src="docs/images/a2hs_3.PNG" alt="Icon at the Home Screen" width="300"/>
 
 <img src="docs/images/a2hs_4.PNG" alt="Full screen no browser address bar and navigation" width="300"/>
-
 <img src="docs/images/a2hs_5.PNG" alt="Compare browser and installed app frames" width="300"/>
 
 
