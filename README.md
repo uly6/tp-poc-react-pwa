@@ -39,7 +39,7 @@ Only the initial load of data and the sync of data back to the server needs the 
 Below is a video showing how can we install the app to the home screen and the basic functionality of the app working when offline.
 
 <video width="320" height="480" controls>
-  <source src="./docs/videos/web_app_a2hs.mov" type="video/mp4">
+  <source src="docs/videos/web_app_a2hs.mov" type="video/mp4">
 </video>
 
 
@@ -128,15 +128,15 @@ We decided to use PouchDB for 3 reasons:
 
 When we add the app to the home screen it works similarly as a native app, it has an icon, splash screen, and run in full screen without the browser address bar on top of navigation menu at the bottom.
 
-![Banner at the bottom](docs/images/a2hs_1.PNG)
+<img src="docs/images/a2hs_1.PNG" alt="Banner at the bottom" width="300"/>
 
-![Add to Home Screen prompt](docs/images/a2hs_2.PNG)
+<img src="docs/images/a2hs_2.PNG" alt="Add to Home Screen prompt" width="300"/>
 
-![Icon at the Home Screen](docs/images/a2hs_3.PNG)
+<img src="docs/images/a2hs_3.PNG" alt="Icon at the Home Screen" width="300"/>
 
-![Full screen no browser address bar and navigation](docs/images/a2hs_4.PNG)
+<img src="docs/images/a2hs_4.PNG" alt="Full screen no browser address bar and navigation" width="300"/>
 
-![Compare browser and installed app frames](docs/images/a2hs_5.PNG)
+<img src="docs/images/a2hs_5.PNG" alt="Compare browser and installed app frames" width="300"/>
 
 
 #### MANIFEST AND META TAGS
@@ -167,7 +167,7 @@ In addition to the manifest file, we have to add some Apple-specific meta tags i
 
 After you click in the banner it will not appear anymore, it keeps track of this state in the localStorage of the browser's device. to make it appear again you have to clean the browser's cache.
 
-![Banner at the bottom](docs/images/a2hs_1.PNG)
+<img src="docs/images/a2hs_1.PNG" alt="Banner at the bottom" width="300"/>
 
 
 ### APP UPDATE
@@ -175,7 +175,7 @@ After you click in the banner it will not appear anymore, it keeps track of this
 Show a prompt indicating that there is a new version of the app and if the user would like to update.
 
 <video width="320" height="480" controls>
-  <source src="./docs/videos/web_app_update.mov" type="video/mp4">
+  <source src="docs/videos/web_app_update.mov" type="video/mp4">
 </video>
 
 
