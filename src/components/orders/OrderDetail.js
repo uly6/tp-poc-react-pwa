@@ -1,10 +1,10 @@
+import { Grid, Typography } from '@material-ui/core';
 import React from 'react';
-import { Typography, Grid } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import { useGetOrderById } from './hooks';
 import ImageList from './ImageList';
-import VideoList from './VideoList';
 import TaskList from './TaskList';
+import VideoList from './VideoList';
 
 export default function OrderDetail() {
   let { id } = useParams();

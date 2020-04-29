@@ -1,15 +1,6 @@
-import React from 'react';
-import {
-  Typography,
-  IconButton,
-  Paper,
-  Grid,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-} from '@material-ui/core';
+import { Grid, IconButton, List, ListItem, ListItemSecondaryAction, ListItemText, Paper, Typography } from '@material-ui/core';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import React from 'react';
 import { Link, useRouteMatch } from 'react-router-dom';
 import { useGetOrders } from './hooks';
 

@@ -1,26 +1,10 @@
-import React, { useState, useContext } from 'react';
-import {
-  IconButton,
-  Paper,
-  Grid,
-  List,
-  ListSubheader,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  Switch,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  TextField,
-  DialogActions,
-  Button,
-} from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItem, ListItemSecondaryAction, ListItemText, ListSubheader, Paper, Switch, TextField } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { useGetTasksByOrderId } from './hooks';
-import { updateTask, addTask, deleteTask } from '../../api/db';
+import React, { useContext, useState } from 'react';
+import { addTask, deleteTask, updateTask } from '../../api/db';
 import { SnackBarContext } from '../../context/SnackBarProvider';
+import { useGetTasksByOrderId } from './hooks';
 
 export default function TaskList({ orderId }) {
   const { showSuccessAlert, showErrorAlert } = useContext(

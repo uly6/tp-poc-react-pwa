@@ -1,20 +1,10 @@
-import React, { useState, useContext } from 'react';
-import {
-  makeStyles,
-  IconButton,
-  Paper,
-  Grid,
-  ListSubheader,
-  GridList,
-  GridListTile,
-  GridListTileBar,
-  Backdrop,
-} from '@material-ui/core';
-import VideocamIcon from '@material-ui/icons/Videocam';
+import { Backdrop, Grid, GridList, GridListTile, GridListTileBar, IconButton, ListSubheader, makeStyles, Paper } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { useGetVideosByOrderId } from './hooks';
+import VideocamIcon from '@material-ui/icons/Videocam';
+import React, { useContext, useState } from 'react';
 import { addVideo, deleteVideo } from '../../api/db';
 import { SnackBarContext } from '../../context/SnackBarProvider';
+import { useGetVideosByOrderId } from './hooks';
 
 const useStyles = makeStyles((theme) => ({
   inputFile: {

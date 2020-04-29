@@ -1,21 +1,10 @@
-import React, { useState, useContext } from 'react';
-import {
-  makeStyles,
-  IconButton,
-  Paper,
-  Grid,
-  ListSubheader,
-  GridList,
-  GridListTile,
-  GridListTileBar,
-  Backdrop,
-} from '@material-ui/core';
-import PhotoCamera from '@material-ui/icons/PhotoCamera';
-// import LocationOnIcon from '@material-ui/icons/LocationOn';
+import { Backdrop, Grid, GridList, GridListTile, GridListTileBar, IconButton, ListSubheader, makeStyles, Paper } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { useGetImagesByOrderId } from './hooks';
+import PhotoCamera from '@material-ui/icons/PhotoCamera';
+import React, { useContext, useState } from 'react';
 import { addImage, deleteImage } from '../../api/db';
 import { SnackBarContext } from '../../context/SnackBarProvider';
+import { useGetImagesByOrderId } from './hooks';
 
 const useStyles = makeStyles((theme) => ({
   inputFile: {

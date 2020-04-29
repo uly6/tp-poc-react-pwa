@@ -1,15 +1,11 @@
-import React from 'react';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import { makeStyles } from '@material-ui/core/styles';
-import {
-  HashRouter as Router,
-  Route,
-  Switch,
-} from 'react-router-dom';
+import React from 'react';
+import { HashRouter as Router, Route, Switch } from 'react-router-dom';
 import Header from './components/header/Header';
-import OrderIndex from './components/orders/OrderIndex';
 import Home from './components/home/Home';
+import OrderIndex from './components/orders/OrderIndex';
 import { SnackBarProvider } from './context/SnackBarProvider';
 
 const useStyles = makeStyles((theme) => ({

@@ -1,14 +1,8 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import {
-  makeStyles,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from '@material-ui/core';
-import HomeIcon from '@material-ui/icons/Home';
+import { List, ListItem, ListItemIcon, ListItemText, makeStyles } from '@material-ui/core';
 import AssignmentIcon from '@material-ui/icons/Assignment';
+import HomeIcon from '@material-ui/icons/Home';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 function ListItemLink(props) {

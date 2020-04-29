@@ -1,24 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
-import {
-  Grid,
-  Typography,
-  Button,
-  CircularProgress,
-  Paper,
-} from '@material-ui/core';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import { Button, CircularProgress, Grid, Typography } from '@material-ui/core';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import DeleteIcon from '@material-ui/icons/Delete';
+import React, { useContext, useEffect, useState } from 'react';
+import { addOrder, addTask, cleanDatabases, DEFAULT_SYNC_METADATA, getSyncMetadata, syncToRemote, updateSyncMetadata } from '../../api/db';
 import { fetchOrders, fetchTasksByOrderId } from '../../api/web';
-import {
-  addOrder,
-  getSyncMetadata,
-  DEFAULT_SYNC_METADATA,
-  updateSyncMetadata,
-  cleanDatabases,
-  addTask,
-  syncToRemote,
-} from '../../api/db';
 import { SnackBarContext } from '../../context/SnackBarProvider';
 
 export default function Home() {

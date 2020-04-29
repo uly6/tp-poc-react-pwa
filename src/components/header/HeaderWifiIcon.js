@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from 'react';
 import WifiIcon from '@material-ui/icons/Wifi';
 import WifiOffIcon from '@material-ui/icons/WifiOff';
-import {serverUrl} from '../../utils/constants';
+import React, { useEffect, useState } from 'react';
+import { serverUrl } from '../../utils/constants';
 export const HeaderWifiIcon = () => {
     const [isOnline, setIsOnline] = useState();
 
