@@ -1,10 +1,7 @@
 import PouchDB from 'pouchdb';
 import PouchFindPlugin from 'pouchdb-find';
 import * as shortid from 'shortid';
-import {
-  getGeolocationFromImage,
-  getGeoloacationFromDevice,
-} from '../utils/geolocation';
+import { getGeoloacationFromDevice, getGeolocationFromImage } from '../utils/geolocation';
 
 shortid.characters(
   '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@',
@@ -18,6 +15,8 @@ PouchDB.on('destroyed', function (dbName) {
   // called whenever a db is destroyed.
   console.log('==>> POUCHEDB destroyed', dbName);
 });
+
+const REMOTE_DB_URL = process.env.REACT_APP_REMOTE_DATABASE_ENDPOINT;
 
 const SYNC_METADATA = 'sync-metadata';
 const ORDERS = 'orders';
@@ -142,7 +141,7 @@ export const syncToRemote = async () => {
 
 const syncStoreToRemote = async (remoteName, getLocalStoreFn) => {
   const remoteDB = new PouchDB(
-    `https://tp-poc-pouchdb-server.herokuapp.com/${remoteName}`,
+    `${REMOTE_DB_URL}/${remoteName}`,
   );
   console.log(await remoteDB.info());
 

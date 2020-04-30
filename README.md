@@ -242,4 +242,4 @@ To check the current browser's support for the APIs go to CanIUse website and/or
 
 ## NOTES
 
-If you want to run the app locally please edit the `package.json` homepage to `/`
+If you want to run the app locally to test the offline capabilities please edit the `package.json` homepage to `/`
