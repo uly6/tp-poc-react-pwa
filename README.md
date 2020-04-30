@@ -38,8 +38,8 @@ Only the initial load of data and the sync of data back to the server needs the 
 
 Below is a video showing how can we install the app to the home screen and the basic functionality of the app working when offline.
 
-<video width="320" height="480" controls>
-  <source src="docs/videos/web_app_a2hs.mov" type="video/mp4">
+<video width="320" controls="true">
+  <source src="docs/videos/web_app_a2hs.webm" type="video/webm">
 </video>
 
 
@@ -171,8 +171,8 @@ After you click in the banner it will not appear anymore, it keeps track of this
 
 Show a prompt indicating that there is a new version of the app and if the user would like to update.
 
-<video width="320" height="480" controls>
-  <source src="docs/videos/web_app_update.mov" type="video/mp4">
+<video width="320" controls="true">
+  <source src="docs/videos/web_app_update.webm" type="video/webm">
 </video>
 
 
